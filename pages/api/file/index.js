@@ -6,6 +6,7 @@ import {
   THUMBNAIL,
   DELETE,
   SCREENSHOT,
+  POST,
 } from '../../../lib/apiCommon';
 import setBaseURL from '../../../lib/pgConn'; // include String.prototype.fQuery
 import S3UPLOAD from '../../../lib/S3AWS';
@@ -24,7 +25,7 @@ export default async function handler(req, res) {
     'Access-Control-Allow-Origin': '*', // for same origin policy
     'Content-Type': 'application/json',
     'Access-Control-Allow-Headers': ['Content-Type', 'Authorization'], // for application/json
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
   });
   // #2. preflight 처리
   if (req.method === 'OPTIONS') return RESPOND(res, {});
@@ -101,15 +102,14 @@ async function post(req, res) {
   const isVideo = file.mimetype.includes('video/');
 
   // #3.1.2. member 검색
-  const qMIUI = await QTS.getMIUI.fQuery({ userId, memberId });
-  if (qMIUI.type === 'error')
-    return qMIUI.onError(res, '3.1.2.1', 'searching member');
-  if (qMIUI.message.rows.length === 0)
-    return ERROR(res, {
-      resultCode: 400,
-      id: 'ERR.school.school.3.2.2',
-      message: '토큰의 userId와 일치하는 member를 찾을 수 없습니다.',
-    });
+  const qMember = await POST(
+    'school',
+    '/checkMember',
+    { 'Content-Type': 'application/json' },
+    { userId, memberId },
+  );
+  if (qMember.type === 'error')
+    return qMember.onError(res, '3.3', 'fatal error while searching member');
 
   // 이미지/동영상의 경우
   let thumbFileName;
@@ -185,8 +185,6 @@ async function post(req, res) {
   const data = qFBI.message.rows[0];
 
   return RESPOND(res, {
-    s3Data,
-    s3ThumbData,
     data,
     message: '파일 업로드 성공',
     resultCode: 200,

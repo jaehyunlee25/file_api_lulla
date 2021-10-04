@@ -3,5 +3,5 @@ select
 from
     file
 where
-    id = '${fileId}'
+    id in (${fileId})
     and is_active = true;
