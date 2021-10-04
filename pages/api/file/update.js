@@ -1,11 +1,9 @@
 import { RESPOND, ERROR, getUserIdFromToken } from '../../../lib/apiCommon';
 import setBaseURL from '../../../lib/pgConn'; // include String.prototype.fQuery
-import { S3DELETE } from '../../../lib/S3AWS';
 
 const QTS = {
   // Query TemplateS
-  getFBI: 'getFilesByIds',
-  delFBI: 'delFilesByIds',
+  setFile: 'setFileById',
 };
 
 // export const config = { api: { bodyParser: false } };
@@ -20,7 +18,7 @@ export default async function handler(req, res) {
   // #2. preflight 처리
   if (req.method === 'OPTIONS') return RESPOND(res, {});
 
-  setBaseURL('sqls/file/delete'); // 끝에 슬래시 붙이지 마시오.
+  setBaseURL('sqls/file/update'); // 끝에 슬래시 붙이지 마시오.
 
   // #3.2.2. post action
   try {
@@ -44,50 +42,22 @@ async function main(req, res) {
   if (qUserId.type === 'error') return qUserId.onError(res, '3.1');
   // const userId = qUserId.message;
 
-  let { id: fileId } = req.body.file;
-  console.log(req.body.file);
-  // #3.1.2. fileId는 배열이어야 한다.
-  if (Array.isArray(fileId)) fileId = fileId.join("','");
-  fileId = ["'", fileId, "'"].join('');
+  let { file: files } = req.body;
 
-  console.log(fileId);
+  if (!Array.isArray(files)) files = [files];
 
-  // #3.2. 파일 목록을 불러온다.
-  const qFiles = await QTS.getFBI.fQuery({ fileId });
-  if (qFiles.type === 'error')
-    return qFiles.onError(res, '3.2', 'searching files');
-
-  // #3.3.
-  qFiles.message.rows.forEach(async (file) => {
-    const qDel = await S3DELETE(file.key);
-    if (qDel.type === 'error')
-      return ERROR(res, {
-        id: 'ERR.file.delete.3.3',
-        message: qDel.message,
-        eStr: qDel.eStr,
+  // #3.2. files는 배열이어야 한다.
+  files.forEach(async (file, i) => {
+    const { id, index } = file;
+    const qUp = await QTS.setFile.fQuery({ id, index });
+    if (qUp.type === 'error') return qUp.onError(res, '3.2', 'updating file');
+    if (i === files.length - 1)
+      return RESPOND(res, {
+        message: '파일 수정에 성공하였습니다.',
+        resultCode: 200,
       });
-    console.log(qDel);
-
-    const qDelThumb = await S3DELETE(file.key.replace('lulla', 'thumb'));
-    if (qDelThumb.type === 'error')
-      return ERROR(res, {
-        id: 'ERR.file.delete.3.3',
-        message: qDelThumb.message,
-        eStr: qDelThumb.eStr,
-      });
-    console.log(qDelThumb);
-
     return true;
   });
 
-  // #3.4. 파일 삭제
-  const qFileDel = await QTS.delFBI.fQuery({ fileId });
-  if (qFileDel.type === 'error')
-    return qFileDel.onError(res, '3.4', 'searching files');
-
-  return RESPOND(res, {
-    // data,
-    message: '파일 삭제 성공',
-    resultCode: 200,
-  });
+  return true;
 }
