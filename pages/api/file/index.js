@@ -86,7 +86,7 @@ async function post(req, res) {
   if (!file)
     return ERROR(res, {
       resultCode: 400,
-      id: 'ERR.school.school.3.1.1',
+      id: 'ERR.file.index.3.1.1',
       message: '처리할 파일이 존재하지 않습니다.',
     });
 
@@ -122,7 +122,7 @@ async function post(req, res) {
     if (qThumb.type === 'error')
       return ERROR(res, {
         resultCode: 400,
-        id: 'ERR.school.school.3.2.1.1',
+        id: 'ERR.file.index.3.2.1.1',
         message: qThumb.message,
         eStr: qThumb.eStr,
       });
@@ -135,7 +135,7 @@ async function post(req, res) {
   if (qUpload.type === 'error')
     return ERROR(res, {
       resultCode: 400,
-      id: 'ERR.school.school.3.2.2.1',
+      id: 'ERR.file.index.3.2.2.1',
       message: qUpload.message,
       eStr: qUpload.eStr,
     });
@@ -149,7 +149,7 @@ async function post(req, res) {
     if (qThumbUpload.type === 'error')
       return ERROR(res, {
         resultCode: 400,
-        id: 'ERR.school.school.3.2.3.1',
+        id: 'ERR.file.index.3.2.3.1',
         message: qThumbUpload.message,
         eStr: qThumbUpload.eStr,
       });
