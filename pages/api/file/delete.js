@@ -27,7 +27,7 @@ export default async function handler(req, res) {
     return await main(req, res);
   } catch (e) {
     return ERROR(res, {
-      id: 'ERR.school.index.3.2.2',
+      id: 'ERR.file.delete.3.2.2',
       message: 'post server logic error',
       error: e.toString(),
     });
