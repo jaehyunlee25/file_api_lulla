@@ -83,7 +83,7 @@ async function main(req, res) {
   // #3.4. 파일 삭제
   const qFileDel = await QTS.delFBI.fQuery({ fileId });
   if (qFileDel.type === 'error')
-    return qFileDel.onError(res, '3.4', 'searching files');
+    return qFileDel.onError(res, '3.4', 'deleting files');
 
   return RESPOND(res, {
     // data,

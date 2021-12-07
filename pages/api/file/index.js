@@ -6,7 +6,7 @@ import {
   THUMBNAIL,
   DELETE,
   SCREENSHOT,
-  POST,
+  // POST,
 } from '../../../lib/apiCommon';
 import setBaseURL from '../../../lib/pgConn'; // include String.prototype.fQuery
 import S3UPLOAD from '../../../lib/S3AWS';
@@ -82,7 +82,7 @@ async function get(req, res) {
 }
 async function post(req, res) {
   // #3.0. 파일이 있는지 확인하고 없으면 리턴한다.
-  const { member_id: memberId, index, file } = req.body;
+  const { /* member_id: memberId, */ index, file } = req.body;
   if (!file)
     return ERROR(res, {
       resultCode: 400,
@@ -95,21 +95,21 @@ async function post(req, res) {
   // userId가 정상적으로 리턴되면, 활성화된 사용자이다.
   const qUserId = await getUserIdFromToken(req.headers.authorization);
   if (qUserId.type === 'error') return qUserId.onError(res, '3.1');
-  const userId = qUserId.message;
+  // const userId = qUserId.message;
 
   const { tmpName: fileName } = file;
   const isImage = file.mimetype.includes('image/');
   const isVideo = file.mimetype.includes('video/');
 
   // #3.1.2. member 검색
-  const qMember = await POST(
+  /* const qMember = await POST(
     'school',
     '/checkMember',
     { 'Content-Type': 'application/json' },
     { userId, memberId },
   );
   if (qMember.type === 'error')
-    return qMember.onError(res, '3.3', 'fatal error while searching member');
+    return qMember.onError(res, '3.3', 'fatal error while searching member'); */
 
   // 이미지/동영상의 경우
   let thumbFileName;
